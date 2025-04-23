@@ -8,6 +8,8 @@ from data import create_sample_evaluation_data
 from metrics import get_metrics_descriptions
 from metrics import calculate_metrics
 
+is_feedback_asked = False
+
 # --- チャットページのUI ---
 def display_chat_page(pipe):
     """チャットページのUIを表示する"""
@@ -49,7 +51,7 @@ def display_chat_page(pipe):
             display_feedback_form()
         else:
              # フィードバック送信済みの場合、次の質問を促すか、リセットする
-             if st.button("次の質問へ"):
+             if st.button("次の質問へ") or is_feedback_asked:
                   # 状態をリセット
                   st.session_state.current_question = ""
                   st.session_state.current_answer = ""
@@ -106,7 +108,9 @@ def display_feedback_form():
             cols[1].metric("類似度", f"{similarity_score:.4f}" if pd.notna(similarity_score) else "-")
             cols[2].metric("関連性", f"{relevance_score:.4f}" if pd.notna(relevance_score) else "-")
 
-            st.rerun() # フィードバックフォームを消すために再実行
+            is_feedback_asked = st.form_submit_button("次の回答へ")
+            if is_feedback_asked:
+                st.rerun() # フィードバックフォームを消すために再実行
 
 # --- 履歴閲覧ページのUI ---
 def display_history_page():
