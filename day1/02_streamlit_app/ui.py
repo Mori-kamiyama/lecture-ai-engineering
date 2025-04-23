@@ -6,6 +6,7 @@ from database import save_to_db, get_chat_history, get_db_count, clear_db
 from llm import generate_response
 from data import create_sample_evaluation_data
 from metrics import get_metrics_descriptions
+from metrics import calculate_metrics
 
 # --- チャットページのUI ---
 def display_chat_page(pipe):
@@ -87,6 +88,24 @@ def display_feedback_form():
             st.success("フィードバックが保存されました！")
             # フォーム送信後に状態をリセットしない方が、ユーザーは結果を確認しやすいかも
             # 必要ならここでリセットして st.rerun()
+
+            bleu_score, similarity_score, word_count, relevance_score = calculate_metrics(
+                st.session_state.current_answer, correct_answer
+            )
+
+            # 評価指標の表示
+            st.markdown("---")
+            cols = st.columns(3)
+            cols[0].metric("正確性スコア", f"{is_correct:.1f}")
+            cols[1].metric("応答時間(秒)", f"{st.session_state.response_time:.2f}")
+            cols[2].metric("単語数", f"{word_count}")
+
+            cols = st.columns(3)
+            # NaNの場合はハイフン表示
+            cols[0].metric("BLEU", f"{bleu_score:.4f}" if pd.notna(bleu_score) else "-")
+            cols[1].metric("類似度", f"{similarity_score:.4f}" if pd.notna(similarity_score) else "-")
+            cols[2].metric("関連性", f"{relevance_score:.4f}" if pd.notna(relevance_score) else "-")
+
             st.rerun() # フィードバックフォームを消すために再実行
 
 # --- 履歴閲覧ページのUI ---
