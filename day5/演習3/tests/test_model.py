@@ -171,3 +171,23 @@ def test_model_reproducibility(sample_data, preprocessor):
     assert np.array_equal(
         predictions1, predictions2
     ), "モデルの予測結果に再現性がありません"
+
+def test_boundary_check(train_model):
+    model, _, _ = train_model
+    # ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked", "Survived"]
+    df = pd.DataFrame({
+        "Pclass": [1, 2, 3],
+        "Sex": ["male", "female", "male"],
+        "Age": [0, 100, 120], # 境界とそれを上回った時
+        "SibSp": [0, 1, 2],
+        "Parch": [0, 1, 2],
+        "Fare": [10, 20, 30],
+        "Embarked": ["S", "C", "S"],
+    })
+
+    # 境界値で推論してみる
+    try:
+        predictions = model.predict(df)
+        assert isinstance(predictions, np.ndarray)
+    except Exception as e:
+        pytest.fail(f"境界値エラー: {e}")
