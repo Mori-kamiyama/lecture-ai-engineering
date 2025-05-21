@@ -2,6 +2,10 @@ kedro
 scikit-learn
 mlflow
 pandas
+
+numpy<2
+pyarrow
+
 pytest
 great_expectations
 black
