@@ -109,65 +109,22 @@ def test_model_exists():
     assert os.path.exists(MODEL_PATH), "モデルファイルが存在しません"
 
 
-def test_model_accuracy(train_model):
-    """モデルの精度を検証"""
-    model, X_test, y_test = train_model
+def test_boundary_check(train_model):
+    model, _, _ = train_model
+    # ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked", "Survived"]
+    df = pd.DataFrame({
+        "Pclass": [1, 2, 3],
+        "Sex": ["male", "female", "male"],
+        "Age": [0, 100, 120], # 境界とそれを上回った時
+        "SibSp": [0, 1, 2],
+        "Parch": [0, 1, 2],
+        "Fare": [10, 20, 30],
+        "Embarked": ["S", "C", "S"],
+    })
 
-    # 予測と精度計算
-    y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-
-    # Titanicデータセットでは0.75以上の精度が一般的に良いとされる
-    assert accuracy >= 0.75, f"モデルの精度が低すぎます: {accuracy}"
-
-
-def test_model_inference_time(train_model):
-    """モデルの推論時間を検証"""
-    model, X_test, _ = train_model
-
-    # 推論時間の計測
-    start_time = time.time()
-    model.predict(X_test)
-    end_time = time.time()
-
-    inference_time = end_time - start_time
-
-    # 推論時間が1秒未満であることを確認
-    assert inference_time < 1.0, f"推論時間が長すぎます: {inference_time}秒"
-
-
-def test_model_reproducibility(sample_data, preprocessor):
-    """モデルの再現性を検証"""
-    # データの分割
-    X = sample_data.drop("Survived", axis=1)
-    y = sample_data["Survived"].astype(int)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    # 同じパラメータで２つのモデルを作成
-    model1 = Pipeline(
-        steps=[
-            ("preprocessor", preprocessor),
-            ("classifier", RandomForestClassifier(n_estimators=100, random_state=42)),
-        ]
-    )
-
-    model2 = Pipeline(
-        steps=[
-            ("preprocessor", preprocessor),
-            ("classifier", RandomForestClassifier(n_estimators=100, random_state=42)),
-        ]
-    )
-
-    # 学習
-    model1.fit(X_train, y_train)
-    model2.fit(X_train, y_train)
-
-    # 同じ予測結果になることを確認
-    predictions1 = model1.predict(X_test)
-    predictions2 = model2.predict(X_test)
-
-    assert np.array_equal(
-        predictions1, predictions2
-    ), "モデルの予測結果に再現性がありません"
+    # 境界値で推論してみる
+    try:
+        predictions = model.predict(df)
+        assert isinstance(predictions, np.ndarray)
+    except Exception as e:
+        pytest.fail(f"境界値エラー: {e}")

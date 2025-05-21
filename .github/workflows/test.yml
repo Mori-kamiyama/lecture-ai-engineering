@@ -40,6 +40,6 @@ jobs:
       run: |
         pytest day5/演習3/tests/test_model.py -v
 
-    - name: Run test time
+    - name: Run test boundary
       run: |
-        pytest day5/演習3/tests/test_time.py -v
+        pytest day5/演習3/tests/test_boundary.py -v
