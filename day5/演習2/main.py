@@ -11,6 +11,7 @@ import pickle
 import time
 import great_expectations as gx
 
+
 class DataLoader:
     """データロードを行うクラス"""
 
@@ -100,7 +101,9 @@ class DataValidator:
                     column="Age", min_value=0, max_value=100
                 ),
                 gx.expectations.ExpectColumnValuesToBeBetween(
-                    column="Fare", min_value=0, max_value=600
+                    column="Fare",
+                    min_value=0,
+                    max_value=600,
                 ),
                 gx.expectations.ExpectColumnDistinctValuesToBeInSet(
                     column="Embarked", value_set=["C", "Q", "S", ""]
