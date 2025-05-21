@@ -112,15 +112,17 @@ def test_model_exists():
 def test_boundary_check(train_model):
     model, _, _ = train_model
     # ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked", "Survived"]
-    df = pd.DataFrame({
-        "Pclass": [1, 2, 3],
-        "Sex": ["male", "female", "male"],
-        "Age": [0, 100, 120], # 境界とそれを上回った時
-        "SibSp": [0, 1, 2],
-        "Parch": [0, 1, 2],
-        "Fare": [10, 20, 30],
-        "Embarked": ["S", "C", "S"],
-    })
+    df = pd.DataFrame(
+        {
+            "Pclass": [1, 2, 3],
+            "Sex": ["male", "female", "male"],
+            "Age": [0, 100, 120],  # 境界とそれを上回った時
+            "SibSp": [0, 1, 2],
+            "Parch": [0, 1, 2],
+            "Fare": [10, 20, 30],
+            "Embarked": ["S", "C", "S"],
+        }
+    )
 
     # 境界値で推論してみる
     try:
